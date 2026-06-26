@@ -1,0 +1,25 @@
+stage = "pretrain"
+seed = 42
+data_root = "data/ukbiobank"
+out_dir = "artifacts/pretrain"
+
+[optim]
+name = "adamw"
+lr = 2e-7
+weight_decay = 1e-2
+grad_clip = 1.0
+
+[schedule]
+epochs = 4000
+warmup_epochs = 200
+patience = 100
+monitor = "val_loss"
+name = "cosine"
+
+[run]
+world_size = 8
+per_device_batch = 256
+grad_accum = 24
+precision = "fp32"
+amp = false
+seeds = [42, 123, 256, 512, 789, 1024, 1337, 2048, 3141, 4096]

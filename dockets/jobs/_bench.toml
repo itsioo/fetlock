@@ -1,0 +1,55 @@
+stage = "finetune"
+seed = 0
+dataset = "synthetic"
+data_root = "data/_bench"
+out_dir = "artifacts/_bench"
+
+[encoder]
+in_channels = 6
+stages = [8, 16, 16]
+kernel = 7
+embed_dim = 32
+dropout = 0.0
+
+[student]
+in_channels = 6
+stages = [8, 8]
+kernel = 5
+
+[head]
+embed_dim = 32
+hidden = 16
+dropout = 0.0
+kl_beta = 0.1
+
+[window]
+sample_rate = 100
+window_seconds = 1.28
+overlap = 0.5
+channels = 6
+
+[pretrain]
+projection_dim = 16
+
+[distill]
+calibration_samples = 16
+
+[optim]
+name = "adamw"
+lr = 1e-3
+weight_decay = 0.0
+grad_clip = 1.0
+
+[schedule]
+epochs = 2
+warmup_epochs = 0
+patience = 2
+monitor = "val_auc"
+
+[run]
+world_size = 1
+per_device_batch = 8
+grad_accum = 1
+precision = "fp32"
+amp = false
+seeds = [0]

@@ -1,0 +1,79 @@
+[build-system]
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fetlock"
+version = "0.4.1"
+description = "Sex-aware transfer-learning anklet for ankle post-traumatic osteoarthritis screening on edge hardware"
+requires-python = "==3.8.*"
+license = { text = "MIT" }
+authors = [{ name = "Motor System Disease Research Group" }]
+keywords = ["wearable", "imu", "osteoarthritis", "transfer-learning", "edge-ai", "gait"]
+dependencies = [
+  "torch==1.13.1",
+  "numpy==1.24.4",
+  "scipy==1.10.1",
+  "attrs==22.2.0",
+  "cattrs==22.2.0",
+  "typer==0.7.0",
+  "click==8.1.3",
+  "onnx==1.13.1",
+  "tomli==2.0.1; python_version < '3.11'",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest==7.4.4",
+  "ruff==0.1.14",
+  "black==23.12.1",
+  "isort==5.13.2",
+  "mypy==1.8.0",
+  "pre-commit==3.5.0",
+]
+
+[project.scripts]
+fetlock = "fetlock.farrier.app:run"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fetlock"]
+
+[tool.black]
+line-length = 100
+target-version = ["py38"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+src_paths = ["src", "vetting"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py38"
+src = ["src", "vetting"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "C4", "RUF"]
+ignore = ["B905", "B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"vetting/*" = ["B011"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["vetting"]
+pythonpath = ["src"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+files = ["src/fetlock"]
+warn_unused_ignores = false
+disallow_untyped_decorators = false
+disallow_subclassing_any = false
+disallow_any_generics = false
+disable_error_code = ["no-any-return", "type-arg"]
+
+[[tool.mypy.overrides]]
+module = ["torch.*", "onnx.*", "scipy.*", "cattrs.*", "typer.*", "click.*"]
+ignore_missing_imports = true

@@ -1,0 +1,22 @@
+stage = "finetune"
+seed = 42
+data_root = "data/most"
+out_dir = "artifacts/ablation_sex_as_feature"
+
+[ablation]
+sex_heads = false
+sex_as_feature = true
+
+[optim]
+lr = 2e-7
+weight_decay = 1e-2
+
+[schedule]
+epochs = 4000
+patience = 20
+monitor = "val_auc"
+
+[run]
+world_size = 8
+per_device_batch = 256
+grad_accum = 24

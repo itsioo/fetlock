@@ -1,0 +1,29 @@
+stage = "distill"
+seed = 42
+data_root = "data/most"
+out_dir = "artifacts/distill"
+
+[distill]
+temperature = 4.0
+alpha = 0.7
+calibration_samples = 500
+
+[optim]
+name = "adamw"
+lr = 2e-7
+weight_decay = 1e-2
+grad_clip = 1.0
+
+[schedule]
+epochs = 2000
+warmup_epochs = 100
+patience = 60
+monitor = "val_auc"
+name = "cosine"
+
+[run]
+world_size = 8
+per_device_batch = 256
+grad_accum = 24
+precision = "fp32"
+amp = false

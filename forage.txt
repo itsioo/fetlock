@@ -1,0 +1,49 @@
+fetlock :: source corpora and anchor references
+checked 2026-06-25; entries that did not resolve at check time are not listed
+
+[ankle / foot inertial cohorts used for adaptation and evaluation]
+
+MOST  Multicenter Osteoarthritis Study, gait sub-study (APDM OPAL 6-axis, 128 Hz -> 100 Hz)
+  access  https://agingresearchbiobank.nia.nih.gov/studies/most/
+  terms   controlled access, application through the NIA Aging Research Biobank
+  role    primary ankle OA-detection benchmark (subject-based 70/15/15 split)
+
+CGWS  Clinical Gait Signals with Wearable Sensors (healthy / neurological / orthopedic)
+  access  https://springernature.figshare.com/articles/dataset/A_Dataset_of_Clinical_Gait_Signals_with_Wearable_Sensors_from_Healthy_Neurological_and_Orthopedic_Cohorts/28806086
+  doi     10.1038/s41597-025-05959-w
+  terms   CC-BY 4.0
+  role    cross-dataset evaluation; foot-mounted sensors only
+
+GaitRec  large-scale ground reaction force dataset of healthy and impaired gait
+  access  https://springernature.figshare.com/collections/GaitRec_A_large-scale_ground_reaction_force_dataset_of_healthy_and_impaired_gait/4788012
+  doi     10.6084/m9.figshare.c.4788012
+  terms   CC-BY 4.0
+  note    figshare gateway answers 403 to scripted clients; fetch from a browser session
+  role    cross-validation on pseudo-kinematic features (GRF -> IMU conversion)
+
+OAI  Osteoarthritis Initiative, accelerometry subset (wrist-worn)
+  access  https://nda.nih.gov/oai/
+  terms   controlled access, data use agreement
+  role    cross-modality / cross-site domain-adaptation check (wrist -> ankle)
+
+[pretraining corpus and released encoder]
+
+UK Biobank  accelerometer corpus (700K+ person-day equivalents)
+  access  https://www.ukbiobank.ac.uk/enable-your-research/apply-for-access
+  terms   approved-application access
+  role    self-supervised pretraining source
+
+SSL-Wearables  self-supervised encoder weights pretrained on UK Biobank accelerometry
+  access  https://github.com/OxWearables/ssl-wearables
+  terms   academic-use licence (Oxford University Innovation)
+  role    pretrained encoder initialisation for wrist -> ankle adaptation
+
+[neuro-biomechanical anchors for the offline concordance panel; no raw imaging is used]
+
+Li et al. 2024  Differences in cortical activation during dorsiflexion and plantarflexion
+  ref     Clinical Orthopaedics and Related Research, vol. 482, no. 5
+  role    published OA-vs-healthy ROI activation effect sizes (SMA, M1, S1, cerebellum)
+
+Dobkin 2004  Ankle dorsiflexion as an fMRI paradigm to assay motor control
+  ref     NeuroImage, vol. 23, no. 1
+  role    healthy-control activation map for the wearable-feature concordance anchor

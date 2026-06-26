@@ -1,0 +1,26 @@
+stage = "finetune"
+seed = 42
+data_root = "data/most"
+out_dir = "artifacts/ablation_gyro_only"
+
+[ablation]
+channels = "gyro"
+
+[encoder]
+in_channels = 3
+
+[student]
+in_channels = 3
+
+[window]
+channels = 3
+
+[schedule]
+epochs = 4000
+patience = 20
+monitor = "val_auc"
+
+[run]
+world_size = 8
+per_device_batch = 256
+grad_accum = 24

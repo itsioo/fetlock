@@ -1,0 +1,123 @@
+fetlock
+=======
+
+A shoeing log for the ankle-anklet work: the code that backs our sex-aware,
+transfer-learned screen for post-traumatic ankle osteoarthritis (PTOA) running on
+a wrist-to-ankle accelerometer/gyroscope stream and ending on a Cortex-M4F class
+microcontroller. The same tree also carries the offline neuro-biomechanical
+concordance check that ties wearable-derived gait primitives to literature-reported
+cortical activation.
+
+The pipeline has four legs, kept in the package as separate craft areas:
+
+  paddock    six-axis windowing, the planted-signal cohort, subject-stratified
+             splits with no window leakage, and the pretext augmentations
+  forge      the temporal CNN spine, the three pretext heads, the shared body
+             with male/female routing, the depthwise-separable student, and the
+             min-max INT8 press
+  temper     the pretraining objective (temporal-order + transform + NT-Xent),
+             the sex-aware loss with cross-head KL, and the distillation loss
+  soundness  AUC / F1 / sensitivity / specificity, fast DeLong, paired bootstrap,
+             Holm-Bonferroni, Benjamini-Hochberg, partial eta-squared, kappa,
+             permutation, ECE, and the feature-to-ROI concordance panel
+  shoeing    seeding, atomic checkpoints, AdamW + warmup-cosine, early stopping,
+             grad-accumulation training loop, DDP wiring
+  farrier    the command-line bench
+
+What the four legs correspond to in the write-up: Eq. (1) is the pretraining
+objective, Eq. (2) the sex-aware loss, Eq. (3) the temperature-scaled distillation,
+Eq. (4) the anchor-resampled Pearson concordance. Stage routing sends a known-sex
+window to its matched head and averages both heads when sex is unknown.
+
+
+Setting up
+----------
+
+pip:
+
+    python -m venv .venv && . .venv/bin/activate
+    pip install -r requirements.txt
+    pip install -e .
+
+conda:
+
+    conda env create -f environment.yml
+    conda activate fetlock
+    pip install -e . --no-deps
+
+docker:
+
+    docker build -t fetlock .
+    docker run --rm --gpus all fetlock finetune --job dockets/jobs/main.toml
+
+The pin is deliberate and unfriendly: CUDA 11.7, torch 1.13.1, Python 3.8. The
+profile in dockets/jobs/main.toml is the one we actually ran, not a laptop-sized
+shortcut. dockets/jobs/_bench.toml exists only so the vetting suite can move two
+steps in a second; do not report anything from it.
+
+
+Data
+----
+
+Every corpus and every neuro anchor lives in forage.txt with its access route and
+licence. MOST and OAI are controlled access; CGWS and GaitRec are CC-BY on figshare;
+the UK Biobank accelerometer corpus and the released self-supervised encoder back the
+pretraining leg. No raw fMRI is touched -- the concordance leg consumes published
+effect sizes only.
+
+A prepared cohort is a directory with manifest.jsonl plus the per-subject .npy
+arrays; point data_root at it. With no manifest present the bench falls back to the
+planted-signal cohort so the commands stay runnable end to end.
+
+
+Running the bench
+-----------------
+
+    fetlock pretrain    --job dockets/jobs/pretrain.toml
+    fetlock adapt       --job dockets/jobs/adapt.toml
+    fetlock finetune    --job dockets/jobs/main.toml
+    fetlock distill     --job dockets/jobs/distill.toml
+    fetlock evaluate    --job dockets/jobs/main.toml
+    fetlock concordance --job dockets/jobs/main.toml
+    fetlock export-onnx --job dockets/jobs/distill.toml --out artifacts/anklet_student.onnx
+
+Any leaf of the config is reachable from the command line:
+
+    fetlock finetune --job dockets/jobs/main.toml --set optim.lr=1e-6 --set schedule.epochs=2000
+
+The ablations in Table II and the input-channel study sit beside the main job:
+ablation_no_tl, ablation_no_sex, ablation_no_da, ablation_sex_as_feature,
+ablation_accel_only, ablation_gyro_only. The transfer-fraction and cross-dataset
+sweeps are the supplementary_* jobs. rounds/ holds the torchrun and sweep wrappers.
+
+
+What to expect
+--------------
+
+On MOST, the routed full model lands near AUC 0.934 +/- 0.016 over the ten seeds
+{42, 123, 256, 512, 789, 1024, 1337, 2048, 3141, 4096}, about 3.3 pp over the next
+baseline; the female subgroup gains about 5.2 pp over sex-mixed training. The
+INT8 student is reported at 48 KB and 12 ms per ten-second window with ~98.9 percent
+of teacher accuracy. The concordance panel recovers SMA-dorsiflexion at r = 0.43
+(p = 0.007) and M1-plantarflexion at r = 0.38 (p = 0.018), surviving FDR; stride-time
+with S1 and ankle-ROM with cerebellum sit at the FDR boundary. These are
+literature-anchored, hypothesis-generating numbers, not subject-matched claims.
+
+
+Compute budget
+--------------
+
+Eight A100-80GB. The finetune and pretrain jobs carry an effective batch of
+8 x 256 x 24 = 49152 at fp32, learning rate 2e-7, warmup-cosine over 4000 epochs,
+weight decay 1e-2, gradient clip 1.0. Distillation runs at temperature 4.0 with
+alpha 0.7 and an INT8 calibration set of 500 windows drawn min-max. Walking this in
+fp32 at the stated effective batch needs the full eight-card node; it is not a
+single-GPU afternoon.
+
+
+Checkpoints
+-----------
+
+Encoder and student weights are available on reasonable request. Checkpoints are
+written atomically and carry the seed and RNG state, so a resumed run continues the
+same stream it started.

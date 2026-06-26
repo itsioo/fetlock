@@ -1,0 +1,21 @@
+stage = "finetune"
+seed = 42
+dataset = "most"
+data_fraction = 0.10
+data_root = "data/most"
+out_dir = "artifacts/transfer_10"
+
+[optim]
+lr = 2e-7
+weight_decay = 1e-2
+
+[schedule]
+epochs = 4000
+patience = 20
+monitor = "val_auc"
+
+[run]
+world_size = 8
+per_device_batch = 256
+grad_accum = 24
+seeds = [42, 123, 256, 512, 789, 1024, 1337, 2048, 3141, 4096]

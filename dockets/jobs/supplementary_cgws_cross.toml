@@ -1,0 +1,16 @@
+stage = "evaluate"
+seed = 42
+dataset = "cgws"
+data_root = "data/cgws"
+out_dir = "artifacts/cgws_cross"
+
+[window]
+sample_rate = 100
+window_seconds = 10.0
+overlap = 0.5
+channels = 6
+
+[run]
+world_size = 1
+per_device_batch = 256
+grad_accum = 1
